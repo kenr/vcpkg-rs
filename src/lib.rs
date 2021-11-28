@@ -1171,6 +1171,11 @@ impl Config {
     }
 
     fn emit_libs(&mut self, lib: &mut Library, vcpkg_target: &VcpkgTarget) -> Result<(), Error> {
+        let link_type = match lib.is_static {
+            true => { "static" },
+            false => { "dylib" }
+        };
+
         for required_lib in &self.required_libs {
             // this could use static-nobundle= for static libraries but it is apparently
             // not necessary to make the distinction for windows-msvc.
@@ -1181,7 +1186,7 @@ impl Config {
             };
 
             lib.cargo_metadata
-                .push(format!("cargo:rustc-link-lib={}", link_name));
+                .push(format!("cargo:rustc-link-lib={}={}", link_type, link_name));
 
             lib.found_names.push(String::from(link_name));
 
